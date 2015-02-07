@@ -246,18 +246,6 @@ private:
     bool mouse_lock; // If mouse lock is enabled causing the cursor to snap to mid-window each movement event.
 };
 
-class SystemSystem final : public SystemBase {
-public:
-    SystemSystem() : glfw_os(new OS()) {}
-    ~SystemSystem();
-
-    void HandleEvents(frame_tp timepoint);
-    void RunBatch() const {}
-    void Terminate() {}
-
-    std::unique_ptr<OS> glfw_os;
-};
-
 } // End of trillek
 
 #endif //OS_H
