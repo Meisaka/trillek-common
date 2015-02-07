@@ -14,3 +14,7 @@
 	path = kqueue
 	url = https://github.com/catageek/libkqueue.git
 	ignore = dirty
+[submodule "netport"]
+	path = https://github.com/Meisaka/NetPort.git
+	url = ./netport
+	ignore = dirty
