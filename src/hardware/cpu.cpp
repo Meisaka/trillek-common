@@ -60,10 +60,10 @@ bool Computer::Initialize(const std::vector<Property> &properties) {
     }
 
     if(!Has<Component::Interactable>(entity_id)) {
-        game.GetSystemComponent().Insert<Component::Interactable>(entity_id, Interaction(entity_id));
+        Insert<Component::Interactable>(entity_id, Interaction(entity_id));
     }
-    auto& act = game.GetSystemComponent().Get<Component::Interactable>(entity_id);
-    act.AddAction(Action::IA_POWER, (uint32_t)Component::VComputer);
+    auto act = Get<Component::Interactable>(GetContainer<Component::Interactable>(entity_id));
+    act->AddAction(Action::IA_POWER, (uint32_t)Component::VComputer);
 
     return true;
 }
@@ -114,8 +114,8 @@ bool VHardware::LinkDevice() {
     using namespace component;
     if(this->linked) return true;
     if(entity_link > 0 && Has<component::Component::VComputer>(entity_link)) {
-        auto& vcr = game.GetSystemComponent().Get<Component::VComputer>(entity_link);
-        vcr.SetDevice(this->slot, this->device);
+        auto vcr = Get<Component::VComputer>(GetContainer<Component::VComputer>(entity_link));
+        vcr->SetDevice(this->slot, this->device);
         this->linked = true;
         LOGMSG(INFO) << "Hardware: Successfully linked " << entity_id;
         return true;
@@ -192,6 +192,7 @@ bool VDisplay::Initialize(const std::vector<Property> &properties) {
     resname << entity_id << "%" << instid;
     auto pixa = resource::ResourceMap::Get<resource::PixelBuffer>(resname.str());
     if(!pixa) {
+        LOGMSG(ERROR) << "VDisplay: No pixel buffer";
         return false;
     }
     pixa->Create(320, 240, 8, resource::ImageColorMode::COLOR_RGBA);
@@ -205,10 +206,10 @@ bool VDisplay::Initialize(const std::vector<Property> &properties) {
     QueueLinkDevice(Component::VDisplay);
 
     if(!Has<Component::Interactable>(entity_id)) {
-        game.GetSystemComponent().Insert<Component::Interactable>(entity_id, Interaction(entity_id));
+        Insert<Component::Interactable>(entity_id, Interaction(entity_id));
     }
-    auto& act = game.GetSystemComponent().Get<Component::Interactable>(entity_id);
-    act.AddAction(Action::IA_POWER, (uint32_t)Component::VDisplay);
+    auto act = Get<Component::Interactable>(GetContainer<Component::Interactable>(entity_id));
+    act->AddAction(Action::IA_POWER, (uint32_t)Component::VDisplay);
 
     return true;
 }
@@ -347,10 +348,10 @@ bool VKeyboard::Initialize(const std::vector<Property> &properties) {
     QueueLinkDevice(Component::VKeyboard);
 
     if(!Has<Component::Interactable>(entity_id)) {
-        game.GetSystemComponent().Insert<Component::Interactable>(entity_id, Interaction(entity_id));
+        Insert<Component::Interactable>(entity_id, Interaction(entity_id));
     }
-    auto& act = game.GetSystemComponent().Get<Component::Interactable>(entity_id);
-    act.AddAction(Action::IA_USE, (uint32_t)Component::VKeyboard);
+    auto act = Get<Component::Interactable>(GetContainer<Component::Interactable>(entity_id));
+    act->AddAction(Action::IA_USE, (uint32_t)Component::VKeyboard);
 
     return true;
 }
