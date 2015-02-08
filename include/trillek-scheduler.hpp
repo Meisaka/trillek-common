@@ -3,21 +3,19 @@
 
 #define MAX_CONCURRENT_THREAD   4
 
-#include <chrono>
 #include <functional>
 #include <atomic>
 #include <condition_variable>
-#include <memory>
 #include <queue>
-#include <list>
 #include <iterator>
+#include "trillek.hpp"
 #include "atomic-queue.hpp"
 
-#define		STOP		0
-#define 	SPLIT		1
-#define		CONTINUE	2
-#define		REQUEUE		3
-#define		REPEAT		4
+#define     STOP  0
+#define    SPLIT  1
+#define CONTINUE  2
+#define  REQUEUE  3
+#define   REPEAT  4
 
 namespace trillek {
 
@@ -27,17 +25,6 @@ class SystemBase;
 
 typedef std::function<int(void)> block_t;
 typedef std::list<block_t> chain_t;
-
-typedef std::chrono::nanoseconds frame_unit;
-#if defined(_MSC_VER)
-// Visual Studio implements steady_clock as system_clock
-// TODO : wait for the fix from Microsoft
-typedef time_point<system_clock, frame_unit> scheduler_tp;
-typedef int64_t frame_tp;
-#else
-typedef time_point<steady_clock, frame_unit> scheduler_tp;
-typedef int64_t frame_tp;
-#endif
 
 class TaskRequestBase {
 public:

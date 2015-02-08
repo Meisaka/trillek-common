@@ -4,11 +4,12 @@
 #include <stdint.h>
 #include <list>
 #include <memory>
+#include <chrono>
 
 // useful variable
 #define GCC_VERSION (__GNUC__ * 10000 \
-                               + __GNUC_MINOR__ * 100 \
-                               + __GNUC_PATCHLEVEL__)
+        + __GNUC_MINOR__ * 100 \
+        + __GNUC_PATCHLEVEL__)
 
 // Visual Studio 2015 will have noexcept keyword
 // Until then we remove it
@@ -60,6 +61,17 @@ class TrillekAllocator;
 // type of a list
 template<class U,class Alloc=std::allocator<U>>
 using trillek_list = std::list<U, TrillekAllocator<U,Alloc>>;
+
+typedef std::chrono::nanoseconds frame_unit;
+#ifdef _MSC_VER
+// Visual Studio implements steady_clock as system_clock
+// TODO : wait for the fix from Microsoft
+typedef std::chrono::time_point<std::chrono::system_clock, frame_unit> scheduler_tp;
+typedef int64_t frame_tp;
+#else
+typedef std::chrono::time_point<std::chrono::steady_clock, frame_unit> scheduler_tp;
+typedef int64_t frame_tp;
+#endif
 
 /** \brief Type of component
  *
