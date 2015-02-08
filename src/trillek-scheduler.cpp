@@ -8,15 +8,17 @@
 
 #include "systems/system-base.hpp"
 #include "trillek-game.hpp"
+
 #if defined(_MSC_VER)
 #include "os.hpp"
 #endif
+
 #include "logging.hpp"
 
 namespace trillek {
 std::function<void(std::shared_ptr<TaskRequest<chain_t>>&&,frame_unit&&)> TaskRequest<chain_t>::queue_task;
 
-scheduler_tp TaskRequestBase::Now() const {
+inline scheduler_tp TaskRequestBase::Now() {
 #if defined(_MSC_VER)
     return scheduler_tp(game.GetOS().GetTime());
 #else
@@ -34,11 +36,11 @@ void TrillekScheduler::Initialize(unsigned int nr_thread, std::queue<SystemBase*
 #else
     scheduler_tp now{std::chrono::steady_clock::now()};
 #endif
-    TaskRequest<chain_t>::Initialize([&](std::shared_ptr<TaskRequest<chain_t>>&& c, frame_unit&& delay)
-                                    {
-                                        c->Reschedule(std::move(delay));
-                                        Queue(std::move(c));
-                                    });
+    TaskRequest<chain_t>::Initialize(
+        [&](std::shared_ptr<TaskRequest<chain_t>>&& c, frame_unit&& delay) {
+            c->Reschedule(std::move(delay));
+            Queue(std::move(c));
+        });
     // prepare threads
     for (unsigned int i = 0; i < nr_thread; ++i) {
         SystemBase* sys = nullptr;
