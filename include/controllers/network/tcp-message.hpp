@@ -3,15 +3,16 @@
 
 #include "controllers/network/message.hpp"
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
 
 class TCPMessage final : public Message {
 public:
     typedef TrillekAllocator<char> allocator_type;
     typedef std::vector<char,allocator_type> vector_type;
 
-    TCPMessage(vector_type&& buffer, size_t size, const ConnectionData* cnxd = nullptr, int fd = -1)
-            : Message(buffer.data(), size, cnxd), buffer(std::move(buffer)) {}
+    TCPMessage(vector_type&& buffer, size_t size, const ConnectionData* cnxd = nullptr, socket_t fd = -1)
+        : Message(buffer.data(), size, cnxd), buffer(std::move(buffer)) {}
 
     ~TCPMessage() {}
 #if 0
@@ -22,7 +23,7 @@ public:
      * \param minor unsigned char the minor code of the message
      *
      */
-    void Send(id_t id, unsigned char major, unsigned char minor);
+    void Send(id_t id, uint8_t major, uint8_t minor);
 #endif
     /** \brief Send a message to a server using TCP
      *
@@ -30,7 +31,7 @@ public:
      * \param minor unsigned char the minor code of the message
      *
      */
-    void Send(unsigned char major, unsigned char minor);
+    void Send(uint8_t major, uint8_t minor);
 
     static allocator_type GetAllocator() {
         return allocator_type();
@@ -40,6 +41,7 @@ private:
     // The buffer
     const vector_type buffer;
 };
+
 } // network
 } // trillek
 

@@ -8,15 +8,19 @@
 #include "sys/time.h"
 #include <iostream>
 #include <mutex>
+#include <network>
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
+
+using net::socket_t;
 
 /** \brief C++ implementation of libkqueue
  */
 class IOPoller final {
 public:
-    IOPoller() {};
-    ~IOPoller() {};
+    IOPoller() : kqhandle(-1) {}
+    ~IOPoller() {}
 
     /** \brief Initialize kqueue
      *
@@ -43,7 +47,7 @@ public:
      * \param fd const int the file descriptor to watch
      *
      */
-    void Create(const int fd) const;
+    void Create(const socket_t fd) const;
 
    /** \brief Add a socket to watch and attach a user pointer.
      *
@@ -57,14 +61,14 @@ public:
      * \param udata void* the pointer to attach to the kevent structure
      *
      */
-    void Create(const int fd, void* udata) const;
+    void Create(const socket_t fd, void* udata) const;
 
     /** \brief Add a socket to watch without EV_DISPATCH flag.
      *
      * \param fd const int the file descriptor
      *
      */
-    void CreatePermanent(int fd) const;
+    void CreatePermanent(socket_t fd) const;
 
     /** \brief Enable an event.
      *
@@ -73,21 +77,21 @@ public:
      * \param fd const int the file descriptor
      *
      */
-    void Watch(const int fd) const;
+    void Watch(const socket_t fd) const;
 
     /** \brief Disable an event
      *
      * \param fd const int the file descriptor
      *
      */
-    void Unwatch(const int fd) const;
+    void Unwatch(const socket_t fd) const;
 
     /** \brief Remove a socket to watch
      *
      * \param fd const int the file descriptor
      *
      */
-    void Delete(const int fd) const;
+    void Delete(const socket_t fd) const;
 
     /** \brief Extract the list of event
      *
@@ -97,9 +101,9 @@ public:
      */
     int Poll(std::vector<struct kevent>& v) const;
 private:
-    class IOEvent;			// An IO event
-    mutable int kqhandle;			// the handle of the kqueue
-    const timespec ts{};	// for non-blocking kevent
+    class IOEvent;          // An IO event
+    mutable int kqhandle;   // the handle of the kqueue
+    const timespec ts{};    // for non-blocking kevent
     mutable std::once_flag only_one;
 };
 
@@ -107,7 +111,7 @@ private:
 
 class IOPoller::IOEvent {
 public:
-    IOEvent(int fd, int filter, int operation, void* udata = NULL) {
+    IOEvent(socket_t fd, int filter, int operation, void* udata = NULL) {
         EV_SET(&ke, fd, filter, operation, 0, 5, udata);
     };
 
@@ -119,7 +123,7 @@ private:
     struct kevent ke;
 };
 
-inline void IOPoller::Create(int fd) const {
+inline void IOPoller::Create(socket_t fd) const {
     IOEvent e(fd, EVFILT_READ, EV_ADD|EV_DISPATCH, NULL);
     auto i = kevent(kqhandle, e.getStruct(), 1, NULL, 0, NULL);
     if (i == -1) {
@@ -128,12 +132,12 @@ inline void IOPoller::Create(int fd) const {
     }
 }
 
-inline void IOPoller::Create(int fd, void* udata) const {
+inline void IOPoller::Create(socket_t fd, void* udata) const {
     IOEvent e(fd, EVFILT_READ, EV_ADD|EV_DISPATCH, udata);
     kevent(kqhandle, e.getStruct(), 1, NULL, 0, NULL);
 }
 
-inline void IOPoller::CreatePermanent(int fd) const {
+inline void IOPoller::CreatePermanent(socket_t fd) const {
     IOEvent e(fd, EVFILT_READ, EV_ADD);
     auto i = kevent(kqhandle, e.getStruct(), 1, NULL, 0, NULL);
     if (i == -1) {
@@ -142,7 +146,7 @@ inline void IOPoller::CreatePermanent(int fd) const {
     }
 }
 
-inline void IOPoller::Watch(const int fd) const {
+inline void IOPoller::Watch(const socket_t fd) const {
     IOEvent e(fd, EVFILT_READ, EV_ENABLE);
     auto i = kevent(kqhandle, e.getStruct(), 1, NULL, 0, NULL);
     if (i == -1) {
@@ -151,12 +155,12 @@ inline void IOPoller::Watch(const int fd) const {
     }
 }
 
-inline void IOPoller::Unwatch(int fd) const {
+inline void IOPoller::Unwatch(socket_t fd) const {
     IOEvent e(fd, EVFILT_READ, EV_DISABLE);
     auto i = kevent(kqhandle, e.getStruct(), 1, NULL, 0, NULL);
 }
 
-inline void IOPoller::Delete(int fd) const {
+inline void IOPoller::Delete(socket_t fd) const {
     IOEvent e(fd, EVFILT_READ, EV_DELETE);
     auto i = kevent(kqhandle, e.getStruct(), 1, NULL, 0, NULL);
 }
@@ -164,6 +168,7 @@ inline void IOPoller::Delete(int fd) const {
 inline int IOPoller::Poll(std::vector<struct kevent>& v) const {
     return kevent(kqhandle, NULL, 0, v.data(), v.size(), &ts);
 }
+
 } // network
 } // trillek
 #endif // IO_POLLER_HPP_INCLUDED

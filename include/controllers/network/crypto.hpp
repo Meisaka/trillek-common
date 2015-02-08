@@ -10,7 +10,8 @@ namespace CryptoPP {
 template<class T, int> class VMAC;
 }
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
 
 class Crypto {
 public:
@@ -26,7 +27,7 @@ public:
      *
      */
     static void VMAC64(byte* digest, const byte* message, size_t len,
-                                    const byte* key, const byte* nonce);
+                       const byte* key, const byte* nonce);
 
 
     /** \brief Calculate a VMAC digest with a size of 16 bytes
@@ -39,7 +40,7 @@ public:
      *
      */
     static void VMAC128(byte* digest, const byte* message, size_t len,
-                                    const byte* key, const byte* nonce);
+                        const byte* key, const byte* nonce);
 
     /** \brief Verify a VMAC digest of 8 bytes
      *
@@ -52,7 +53,7 @@ public:
      *
      */
     static bool VMAC_Verify(const byte* digest, const byte* message, size_t len,
-                                            const byte* key, const byte* nonce);
+                            const byte* key, const byte* nonce);
 
     /** \brief Get a random number of 8 bytes
      *
@@ -80,18 +81,18 @@ public:
      *
      */
     static void PBKDF(byte* derived, const byte* password,
-                    size_t password_len, const byte* salt, size_t salt_len);
+                      size_t password_len, const byte* salt, size_t salt_len);
 
     /** \brief A pseudo-random number generator provided by crypto++
      *
      * \return AutoSeededRandomPool& the PRNG
      *
      */
-    static AutoSeededRandomPool& RNG() { return _prng; };
+    static AutoSeededRandomPool& RNG() { return _prng; }
 
 private:
 
-/*		DH _dh;
+/*	DH _dh;
     SecByteBlock _priv;
     SecByteBlock _pub;
 
@@ -101,6 +102,7 @@ private:
     // TODO: make a prng local to each thread and suppress synchronization, needs thread_local support
     static std::mutex _prng_m;
 };
+
 } // network
 } // trillek
 

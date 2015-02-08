@@ -111,7 +111,7 @@ private:
 };
 
 template<Component type>
-class ComponentAdder<SYSTEM,type,float_t> {
+class ComponentAdder<SYSTEM,type,float> {
 public:
     ComponentAdder(component::SystemValue& system) : system(system) {};
 
@@ -134,7 +134,7 @@ private:
 };
 
 template<Component type>
-class ComponentAdder<SYSTEM,type,double_t> {
+class ComponentAdder<SYSTEM,type,double> {
 public:
     ComponentAdder(component::SystemValue& system) : system(system) {};
 

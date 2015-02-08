@@ -16,43 +16,43 @@ VMAC_DatagramHasher::VMAC_DatagramHasher(buffer&& key)
 
 bool VMAC_DatagramHasher::Verify(const byte* digest, const byte* message, size_t len, uint64_t nonce) {
     CryptoPP::Integer inonce(CryptoPP::Integer::POSITIVE, static_cast<CryptoPP::lword>(nonce));
-/*     Integer vmac, k, m;
+/*   Integer vmac, k, m;
     vmac.Decode(digest, 8);
     k.Decode(_key->data(), 16);
     m.Decode(message, len);
-    std::cout << ">>Verify VMAC" << std::endl;
-    std::cout << "   VMAC is " << std::hex << vmac << std::endl;
-    std::cout << "   nonce is " << _nonce << std::endl;
-    std::cout << "   key is " << std::hex << k << std::endl;
-    std::cout << "   message is " << std::hex << m << std::endl;
-    std::cout << "   len is " << len << std::endl;
+    std::cout << ">>Verify VMAC";
+    std::cout << "   VMAC is " << std::hex << vmac;
+    std::cout << "   nonce is " << _nonce;
+    std::cout << "   key is " << std::hex << k;
+    std::cout << "   message is " << std::hex << m;
+    std::cout << "   len is " << len;
 */
     inonce.Encode(_nonce, 8);
     _hasher.Resynchronize(_nonce, 8);
     if (_hasher.VerifyDigest(digest, message, len)) {
-//        std::cout << ">>VMAC2 OK" << std::endl;
+//      std::cout << ">>VMAC2 OK";
         return true;
     }
-//    std::cout << ">>VMAC2 FAILED" << std::endl;
+//  std::cout << ">>VMAC2 FAILED";
     return false;
 }
 
 void VMAC_DatagramHasher::CalculateDigest(byte* digest, const byte* message, size_t len, uint64_t nonce) {
     CryptoPP::Integer inonce(CryptoPP::Integer::POSITIVE, static_cast<CryptoPP::lword>(nonce));
     inonce.Encode(_nonce, 8);
-//    std::cout << ">>Compute VMAC" << std::endl;
+//  std::cout << ">>Compute VMAC";
     _hasher.Resynchronize(_nonce, 8);
     _hasher.CalculateDigest(digest, message, len);
-/*     Integer vmac, nonc, k, m;
+/*  Integer vmac, nonc, k, m;
     k.Decode(_key->data(), 16);
     m.Decode(message, len);
-    std::cout << "   nonce is " << inonce << std::endl;
-    std::cout << "   key is " << std::hex << k << std::endl;
-    std::cout << "   message is " << std::hex << m << std::endl;
-    std::cout << "   len is " << len << std::endl;
+    std::cout << "   nonce is " << inonce;
+    std::cout << "   key is " << std::hex << k;
+    std::cout << "   message is " << std::hex << m;
+    std::cout << "   len is " << len;
     _hasher.Info();
     vmac.Decode(digest, 8);
-    std::cout << "   VMAC is " << std::hex << vmac << std::endl;
+    std::cout << "   VMAC is " << std::hex << vmac;
 */
 }
 } // cryptography

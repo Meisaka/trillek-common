@@ -10,7 +10,8 @@
 
 const std::chrono::seconds TIMEOUT(3);
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
 
 /** \brief This object holds the data needed to reassemble frames.
  * Instances are provided to the reassembling block for processing.
@@ -24,7 +25,8 @@ public:
      * cxdata_ptr const ConnectionData* const a pointer on an object storing
      * some data on the connection
      */
-    Frame_req(const int fd, size_t length_total, const ConnectionData* const cxdata_ptr, std::shared_ptr<Message> message);
+    Frame_req(const socket_t fd, size_t length_total,
+        const ConnectionData* const cxdata_ptr, std::shared_ptr<Message> message);
 
     // delete copy constructor and assignment for zero-copy guarantee
     Frame_req(Frame_req&) = delete;
@@ -41,7 +43,7 @@ public:
      * \return const ConnectionData* const the object
      *
      */
-    const ConnectionData* const CxData() const { return cx_data; };
+    const ConnectionData* const CxData() const { return cx_data; }
 
     /** \brief Reset the timer for this request
      *
@@ -60,7 +62,7 @@ public:
     uint32_t length_requested;
     uint32_t length_got;
     size_t length_total;
-    const int fd;
+    const uint8_t fd;
 private:
 #if defined(_MSC_VER)
     std::chrono::nanoseconds expiration_time;

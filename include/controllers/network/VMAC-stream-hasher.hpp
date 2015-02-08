@@ -7,7 +7,9 @@
 #include "aes.h"
 #include "integer.h"
 
-namespace trillek { namespace network { namespace cryptography {
+namespace trillek {
+namespace network {
+namespace cryptography {
 
 using namespace std::placeholders;
 
@@ -37,7 +39,7 @@ public:
      * \return The function to hash a message
      *
      */
-    std::function<void(unsigned char*,const unsigned char*,size_t,uint64_t)> Hasher() {
+    std::function<void(uint8_t*,const uint8_t*,size_t,uint64_t)> Hasher() {
         return std::bind(&cryptography::VMAC_StreamHasher::CalculateDigest, this->shared_from_this(), _1, _2, _3);
     }
 
@@ -46,7 +48,7 @@ public:
      * \return The function to verify a message
      *
      */
-    std::function<bool(const unsigned char*,const unsigned char*,size_t,uint64_t)> Verifier() {
+    std::function<bool(const uint8_t*,const uint8_t*,size_t,uint64_t)> Verifier() {
         return std::bind(&cryptography::VMAC_StreamHasher::Verify, this->shared_from_this(), _1, _2, _3);
     }
 
@@ -74,6 +76,7 @@ private:
     CryptoPP::Integer _nonce;
     CryptoPP::VMAC<CryptoPP::AES,64> _hasher;
 };
+
 } // cryptography
 } // network
 } // trillek

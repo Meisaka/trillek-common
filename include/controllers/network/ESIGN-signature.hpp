@@ -8,7 +8,9 @@
 #include "tiger.h"
 #include "queue.h"
 
-namespace trillek { namespace network { namespace cryptography {
+namespace trillek {
+namespace network {
+namespace cryptography {
 
 using namespace std::placeholders;
 
@@ -98,7 +100,7 @@ public:
      * \return std::function<void(unsigned char*,const unsigned char*,size_t)> the functor
      *
      */
-    std::function<void(unsigned char*,const unsigned char*,size_t)> Hasher() const {
+    std::function<void(uint8_t*, const uint8_t*, size_t)> Hasher() const {
         return std::bind(&cryptography::ESIGN_Signature::Sign, this->shared_from_this(), _1, _2, _3);
     }
 
@@ -107,7 +109,7 @@ public:
      * \return std::function<bool(const unsigned char*,const unsigned char*,size_t)> the functor
      *
      */
-    std::function<bool(const unsigned char*,const unsigned char*,size_t)> Verifier() const {
+    std::function<bool(const uint8_t*, const uint8_t*, size_t)> Verifier() const {
         return std::bind(&cryptography::ESIGN_Signature::Verify, this->shared_from_this(), _1, _2, _3);
     }
 

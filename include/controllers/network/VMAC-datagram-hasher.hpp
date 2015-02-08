@@ -7,7 +7,9 @@
 #include "aes.h"
 #include "integer.h"
 
-namespace trillek { namespace network { namespace cryptography {
+namespace trillek {
+namespace network {
+namespace cryptography {
 
 using namespace std::placeholders;
 
@@ -35,18 +37,16 @@ public:
     /** \brief Get a function object containing the hasher
      *
      * \return The function to hash a message
-     *
      */
-    std::function<void(unsigned char*,const unsigned char*,size_t,uint64_t)> Hasher() {
+    std::function<void(uint8_t*,const uint8_t*,size_t,uint64_t)> Hasher() {
         return std::bind(&cryptography::VMAC_DatagramHasher::CalculateDigest, this->shared_from_this(), _1, _2, _3, _4);
     }
 
     /** \brief Get a function object containing the verifier
      *
      * \return The function to verify a message
-     *
      */
-    std::function<bool(const unsigned char*,const unsigned char*,size_t,uint64_t)> Verifier() {
+    std::function<bool(const uint8_t*,const uint8_t*,size_t,uint64_t)> Verifier() {
         return std::bind(&cryptography::VMAC_DatagramHasher::Verify, this->shared_from_this(), _1, _2, _3, _4);
     }
 
@@ -61,7 +61,6 @@ private:
      * \param len int the length of the message
      * \param nonce uint64_t the nonce
      * \return bool true if the verification is positive, false otherwise
-     *
      */
     bool Verify(const byte* digest, const byte* message, size_t len, uint64_t nonce);
 
@@ -81,6 +80,7 @@ private:
     byte _nonce[8];
     CryptoPP::VMAC<CryptoPP::AES,64> _hasher;
 };
+
 } // cryptography
 } // network
 } // trillek

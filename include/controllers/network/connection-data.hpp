@@ -5,7 +5,8 @@
 #include <vector>
 #include "controllers/network/authentication-handler.hpp"
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
 
 class NetworkNodeData;
 
@@ -15,11 +16,11 @@ class ConnectionData final {
 public:
     /** \brief Constructor
      *
-     * \param state const unsigned char the initial state of the client
+     * \param state const uint8_t the initial state of the client
      * \param connection the connection instance
      *
      */
-    ConnectionData(const unsigned char state, std::shared_ptr<NetworkNodeData> node_data) :
+    ConnectionData(const uint8_t state, std::shared_ptr<NetworkNodeData> node_data) :
         _auth_state(state),
         _node_data(node_data) {}
 
@@ -29,10 +30,9 @@ public:
      *
      * \param id const id_t the id of the entity
      * \param verifier the verifier functor to check packet received
-     *
      */
     ConnectionData(std::shared_ptr<NetworkNodeData> node_data)
-            : _auth_state(AUTH_SHARE_KEY), _node_data(node_data) {}
+        : _auth_state(AUTH_SHARE_KEY), _node_data(node_data) {}
 
     ~ConnectionData() {}
 
@@ -41,11 +41,10 @@ public:
 
     /** \brief Compare atomically the current state of the connection
      *
-     * \param state unsigned char the state to compare with
+     * \param state uint8_t the state to compare with
      * \return bool true if equal, false otherwise
-     *
      */
-    bool CompareAuthState(unsigned char state) const {
+    bool CompareAuthState(uint8_t state) const {
         return (_auth_state.load() == state);
     }
 
@@ -59,35 +58,32 @@ public:
      *
      * \param state unsigned char the state to set
      * \return bool true if the new state was allowed and set
-     *
      */
-    bool SetAuthState(unsigned char state) const {
+    bool SetAuthState(uint8_t state) const {
         if (! state) {
             // AUTH_NONE
             _auth_state.store(state);
             return false;
         }
-        auto previous = const_cast<unsigned char*>(&_states.at(state-1));
+        auto previous = const_cast<uint8_t*>(&_states.at(state - 1));
         return std::atomic_compare_exchange_strong(&_auth_state, previous, state);
     }
 
     /** \brief Return the state of the connection
      *
-     * \return unsigned char the state
-     *
+     * \return uint8_t the state
      */
-    unsigned char AuthState() const {
+    uint8_t AuthState() const {
         return _auth_state.load();
     }
 
     /** \brief Get the instance of TCPConnection
      *
-     * \return TCPConnection the connexion
-     *
+     * \return TCPConnection the connection
      */
     bool ConnectionAccept() const {
-        unsigned char key_exchange_state = AUTH_KEY_EXCHANGE;
-        unsigned char share_key_state = AUTH_SHARE_KEY;
+        uint8_t key_exchange_state = AUTH_KEY_EXCHANGE;
+        uint8_t share_key_state = AUTH_SHARE_KEY;
         return (std::atomic_compare_exchange_strong(&_auth_state, &key_exchange_state, share_key_state));
     }
 
@@ -95,9 +91,9 @@ public:
 
 private:
     // connection write is protected by _auth_state single-threaded transition. no read
-    mutable std::atomic<unsigned char> _auth_state;
+    mutable std::atomic<uint8_t> _auth_state;
     std::shared_ptr<NetworkNodeData> _node_data;
-    static const std::vector<unsigned char> _states;
+    static const std::vector<uint8_t> _states;
 };
 } // network
 } // trillek

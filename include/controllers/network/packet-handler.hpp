@@ -3,7 +3,8 @@
 
 #include "atomic-queue.hpp"
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
 
 class Message;
 
@@ -37,6 +38,7 @@ public:
     };
 
 };
+
 } // namespace packet_handler
 } // namespace network
 } // namespace trillek

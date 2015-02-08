@@ -3,12 +3,15 @@
 
 #include "controllers/network/message.hpp"
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
 
 class MessageUnauthenticated final : public Message {
 public:
-    MessageUnauthenticated(vector_type&& buffer, size_t size, const ConnectionData* cnxd, int fd)
-            : Message(buffer.data(), size, cnxd), buffer(std::move(buffer)), cx_data(cnxd), fd(fd) {}
+    MessageUnauthenticated(vector_type&& buffer, size_t size,
+        const ConnectionData* cnxd, socket_t fd)
+        : Message(buffer.data(), size, cnxd),
+          buffer(std::move(buffer)), cx_data(cnxd), fd(fd) {}
 
     ~MessageUnauthenticated() {}
 
@@ -17,13 +20,13 @@ public:
      * \return the file descriptor
      *
      */
-    int FileDescriptor() const { return fd; }
+    socket_t FileDescriptor() const { return fd; }
 
     const ConnectionData* CxData() { return cx_data; }
 private:
     const vector_type buffer;
     const ConnectionData* const cx_data;
-    const int fd;
+    const socket_t fd;
 };
 
 } // network

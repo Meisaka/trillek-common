@@ -7,47 +7,50 @@
 #include <cstring>
 #include <assert.h>
 #include "controllers/network/packet-handler.hpp"
-#include "controllers/network/network_common.hpp"
+#include <network>
 #include "trillek.hpp"
 #include "logging.hpp"
 
-// size of the VMAc tag
-#define VMAC_SIZE			8
+// size of the VMAC tag
+#define VMAC_SIZE      8
 // size of the ESIGN tag
-#define ESIGN_SIZE          24
+#define ESIGN_SIZE     24
 // size of the counter
-#define COUNTER_SIZE        4
+#define COUNTER_SIZE   4
 
 // TODO : Convert integers to Big Endian before sending them to the network
 
 // Version MAJOR codes
 // unauthenticated messages: everyone can send them
-#define TEST_MSG			0		// Reserved
-#define NET_MSG 		1		// low level messages for authentication and disconnect
-#define SERVER_MSG		2		// Server public information
-#define PUBPLAYER_MSG	3		// Player public profile
-#define	DLBINARY_MSG	4		// for binary download
-#define	ASSETS_MSG		5		// for public assets download
-#define	RESERVED_6		6
-#define	RESERVED_7		7
+#define TEST_MSG       0  // Reserved
+#define NET_MSG        1  // low level messages for authentication and disconnect
+#define SERVER_MSG     2  // Server public information
+#define PUBPLAYER_MSG  3  // Player public profile
+#define DLBINARY_MSG   4  // for binary download
+#define ASSETS_MSG     5  // for public assets download
+#define RESERVED_6     6
+#define RESERVED_7     7
 // authenticated messages: only authenticated users can send and receive this
-#define	PROFILE_MSG		8		// player private profile
-#define WORLD_MSG		9		// world data
-#define GAME_MSG		10		// game data
-#define SOCIAL_MSG		11		// chat/mail
-#define PASSETS_MSG		11		// private assets
-#define CPU_MSG			12		// for CPU...
+#define PROFILE_MSG    8  // player private profile
+#define WORLD_MSG      9  // world data
+#define GAME_MSG      10  // game data
+#define SOCIAL_MSG    11  // chat/mail
+#define PASSETS_MSG   12  // private assets
+#define CPU_MSG       13  // for CPU...
 // Feel free to add or modify this list
 
 // Minor codes
 // TEST_MSG
 #define TEST_MSG_TCP 0
 #define TEST_MSG_UDP 1
-#define UDP_ECHO 2
+#define UDP_ECHO     2
 
-#define IS_RESTRICTED(x)	((x >> 3) != 0)
+#define IS_RESTRICTED(x) ((x >> 3) != 0)
 
-namespace trillek { namespace network {
+namespace trillek {
+namespace network {
+
+using net::socket_t;
 
 class ConnectionData;
 class NetworkNodeData;
@@ -59,14 +62,14 @@ class NetworkNodeData;
 #pragma pack(1)
 struct msg_hdr {
     uint16_t flags;
-    unsigned char type_major;
-    unsigned char type_minor;
+    uint8_t type_major;
+    uint8_t type_minor;
     uint64_t timestamp;
 };
 #pragma pack(pop)
 
 struct msg_tail_stoc {
-    unsigned char tag[VMAC_SIZE];
+    uint8_t tag[VMAC_SIZE];
 };
 
 /** \brief The header of the frame, i.e the length
@@ -116,7 +119,7 @@ public:
     }
 
     template<class T>
-    static std::shared_ptr<T> New(size_t size, const ConnectionData* cnxd = nullptr, int fd = -1) {
+    static std::shared_ptr<T> New(size_t size, const ConnectionData* cnxd = nullptr, socket_t fd = -1) {
         auto buffer = typename T::vector_type(typename T::allocator_type());
         buffer.reserve(size);
         return std::allocate_shared<T>(TrillekAllocator<T>(), std::move(buffer), size, cnxd, fd);
@@ -136,7 +139,7 @@ public:
      * \param minor unsigned char the minor code of the message
      *
      */
-    virtual void Send(id_t id, unsigned char major, unsigned char minor) {};
+    virtual void Send(id_t id, uint8_t major, uint8_t minor) {};
 
     /** \brief Send a message to a server using TCP
      *
@@ -144,7 +147,7 @@ public:
      * \param minor unsigned char the minor code of the message
      *
      */
-    virtual void Send(unsigned char major, unsigned char minor) {};
+    virtual void Send(uint8_t major, uint8_t minor) {};
 
     /** \brief Maps the body of the message to the structure of
      * the packet of type T
@@ -185,7 +188,7 @@ protected:
      * \param fd (internal) the file descriptor
      *
      */
-    Message(char* buffer, size_t size, const ConnectionData* cnxd = nullptr, int fd = -1);
+    Message(char* buffer, size_t size, const ConnectionData* cnxd = nullptr, socket_t fd = -1);
 
     /** \brief Set the timestamp
      *
@@ -214,10 +217,10 @@ protected:
      * \param tag_size size of the cryptotag
      *
      */
-    void Send(int fd, unsigned char major, unsigned char minor,
-        const std::function<void(unsigned char*,const unsigned char*,size_t,uint64_t)>& hasher,
-        unsigned char* tagptr,
-        unsigned int tag_size);
+    void Send(socket_t fd, uint8_t major, uint8_t minor,
+        const std::function<void(uint8_t*,const uint8_t*,size_t,uint64_t)>& hasher,
+        uint8_t* tagptr,
+        uint32_t tag_size);
 
     /** \brief Prepare and send data to the network using a socket (server version)
      *
@@ -229,10 +232,10 @@ protected:
      * \param tag_size size of the cryptotag
      *
      */
-    void Send(int fd, unsigned char major, unsigned char minor,
-        const std::function<void(unsigned char*,const unsigned char*,size_t)>& hasher,
-        unsigned char* tagptr,
-        unsigned int tag_size);
+    void Send(socket_t fd, uint8_t major, uint8_t minor,
+        const std::function<void(uint8_t*,const uint8_t*,size_t)>& hasher,
+        uint8_t* tagptr,
+        uint32_t tag_size);
 
     /** \brief Prepare and send data to the network using a network address (server version)
      *
@@ -244,10 +247,10 @@ protected:
      * \param tag_size size of the cryptotag
      *
      */
-    void Send(const NetworkAddress& address, unsigned char major, unsigned char minor,
-        const std::function<void(unsigned char*,const unsigned char*,size_t)>& hasher,
-        unsigned char* tagptr,
-        unsigned int tag_size);
+    void Send(const net::address& address, uint8_t major, uint8_t minor,
+        const std::function<void(uint8_t*,const uint8_t*,size_t)>& hasher,
+        uint8_t* tagptr,
+        uint32_t tag_size);
 
     /** \brief Prepare the message to be sent
      *
@@ -255,7 +258,7 @@ protected:
      * \param minor the minor code
      *
      */
-    void Prepare(unsigned char major, unsigned char minor);
+    void Prepare(uint8_t major, uint8_t minor);
 
 private:
     /** \brief Send data to the network using a socket
@@ -266,10 +269,10 @@ private:
      * \param tag_size size of the cryptotag
      *
      */
-    void SendNow(int fd,
-        const std::function<void(unsigned char*,const unsigned char*,size_t,uint64_t)>& hasher,
-        unsigned char* tagptr,
-        unsigned int tag_size);
+    void SendNow(socket_t fd,
+        const std::function<void(uint8_t*, const uint8_t*, size_t, uint64_t)>& hasher,
+        uint8_t* tagptr,
+        uint32_t tag_size);
 
 
     /** \brief Send data to the network using a socket
@@ -281,7 +284,7 @@ private:
      * \param minor the minor code
      *
      */
-    void SendMessageNoVMAC(int fd, uint8_t major, uint8_t minor) {
+    void SendMessageNoVMAC(socket_t fd, uint8_t major, uint8_t minor) {
         if(fd < 0) {
             return;
         }
@@ -290,7 +293,7 @@ private:
         header->type_minor = minor;
         FrameHeader()->length = index - sizeof(Frame_hdr);
 
-        if (send(fd, reinterpret_cast<char*>(FrameHeader()), index) <= 0) {
+        if (net::send(fd, reinterpret_cast<char*>(FrameHeader()), index) <= 0) {
             LOGMSG(ERROR) << "could not send frame with no tag to fd = " << fd ;
         }
 
@@ -340,7 +343,7 @@ private:
      *
      */
     size_t BodySize() {
-        return (Tail<unsigned char*>() - reinterpret_cast<unsigned char*>(Body()));
+        return (Tail<unsigned char*>() - reinterpret_cast<uint8_t*>(Body()));
     }
 
     /** \brief Set the index to a new position.
@@ -414,7 +417,9 @@ private:
      * \param nodedata the instance to store
      *
      */
-    void SetNodeData(std::shared_ptr<NetworkNodeData> nodedata) { this->node_data = std::move(nodedata); }
+    void SetNodeData(std::shared_ptr<NetworkNodeData> nodedata) {
+        this->node_data = std::move(nodedata);
+    }
 
     /** \brief NodeData instance getter
      *
@@ -435,7 +440,7 @@ private:
 
 // Declare specialized template functions.
 template<> Message& Message::operator<<(const std::string& in);
-template<> Message& Message::operator<<(const std::vector<unsigned char>& in);
+template<> Message& Message::operator<<(const std::vector<uint8_t>& in);
 } // network
 } // trillek
 
