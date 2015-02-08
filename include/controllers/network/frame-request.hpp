@@ -62,7 +62,7 @@ public:
     uint32_t length_requested;
     uint32_t length_got;
     size_t length_total;
-    const uint8_t fd;
+    const socket_t fd;
 private:
 #if defined(_MSC_VER)
     std::chrono::nanoseconds expiration_time;
