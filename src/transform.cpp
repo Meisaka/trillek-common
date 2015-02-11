@@ -1,10 +1,15 @@
 #include "transform.hpp"
-#include "systems/transform-system.hpp"
 
 namespace trillek {
 
-Transform::Transform(unsigned int entity_id) :
-    orientation(glm::quat(1, 0, 0, 0)), scale(1.0f), entity_id(entity_id) {
+Transform::Transform() :
+    orientation(glm::quat(1, 0, 0, 0)), scale(1.0f) {
+}
+
+Transform::Transform(glm::vec3 translation, glm::vec3 rotation, glm::vec3 scale) {
+    SetTranslation(translation);
+    SetRotation(rotation);
+    SetScale(scale);
 }
 
 void Transform::Translate(const glm::vec3 amount) {

@@ -9,7 +9,6 @@
 #include "trillek-game.hpp"
 #include "components/component.hpp"
 #include "components/shared-component.hpp"
-#include "systems/transform-system.hpp"
 
 namespace trillek {
 namespace script {
