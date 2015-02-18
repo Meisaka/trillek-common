@@ -2,8 +2,9 @@
 #define COMPONENT_HPP_INCLUDED
 
 #include <vector>
-#include "systems/physics.hpp"
+#include <map>
 #include "bitmap.hpp"
+#include "trillek-scheduler.hpp"
 #include "components/component-enum.hpp"
 #include "components/component-container.hpp"
 

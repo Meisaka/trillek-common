@@ -15,13 +15,126 @@ std::string MakeString(const rapidjson::Value& v) {
     return std::string(v.GetString(), v.GetStringLength());
 }
 
-JSONPasrser::JSONPasrser() {
+JSONParser::JSONParser() {
     static std::once_flag only_one;
 
-    std::call_once(only_one, [this] () { RegisterTypes(); } );
+    std::call_once(only_one, [this] () { RegisterTypes(); this->RegisterComponentTypes(); });
+}
+std::shared_ptr<JSONComponent> JSONParser::ParseJSONComponent(rapidjson::Value& node) {
+    if (node.IsObject()) {
+        auto component = std::make_shared<JSONComponent>();
+
+        for (auto component_property_itr = node.MemberBegin();
+            component_property_itr != node.MemberEnd(); ++component_property_itr) {
+            std::string component_property_name = MakeString(component_property_itr->name);
+
+            if (component_property_itr->value.IsString()) {
+                std::string property_value = MakeString(component_property_itr->value);
+                Property p(component_property_name, property_value);
+                component->properties.push_back(p);
+            }
+            else if (component_property_itr->value.IsBool()) {
+                bool property_value = component_property_itr->value.GetBool();
+                Property p(component_property_name, property_value);
+                component->properties.push_back(p);
+            }
+            else if (component_property_itr->value.IsDouble()) {
+                double property_value = component_property_itr->value.GetDouble();
+                Property p(component_property_name, property_value);
+                component->properties.push_back(p);
+            }
+            else if (component_property_itr->value.IsInt()) {
+                int property_value = component_property_itr->value.GetInt();
+                Property p(component_property_name, property_value);
+                component->properties.push_back(p);
+            }
+            else if (component_property_itr->value.IsUint()) {
+                unsigned int property_value = component_property_itr->value.GetUint();
+                Property p(component_property_name, property_value);
+                component->properties.push_back(p);
+            }
+            // TODO ele if (component_property_itr->value.IsObject()) {} to handle inline resource initialization, etc.
+        }
+        return component;
+    }
+    return nullptr;
 }
 
-bool JSONPasrser::Parse(const std::string& fname) {
+void JSONParser::ParseJSONEntity(rapidjson::Value& node) {
+    if (node.IsArray()) {
+        for (auto entity_itr = node.Begin(); entity_itr != node.End(); ++entity_itr) {
+            if (entity_itr->IsObject()) {
+                std::string entity_name = "";
+                unsigned int entity_id = 0;
+                auto entity = std::make_shared<JSONEntity>();
+
+                for (auto entity_property_itr = entity_itr->MemberBegin();
+                    entity_property_itr != entity_itr->MemberEnd(); ++entity_property_itr) {
+                    std::string entity_property_name = MakeString(entity_property_itr->name);
+                    if (entity_property_itr->value.IsObject()) {
+                        if (entity_property_itr->value.IsObject()) {
+                            unsigned int component_type_id = GetTypeIDFromName(entity_property_name);
+                            
+                            auto component = ParseJSONComponent(entity_property_itr->value);
+                            if (component) {
+                                component->component_name = entity_property_name;
+
+                                if (this->factories.count(component_type_id)) {
+                                    if (!this->factories[component_type_id](entity_id, component->properties)) {
+                                        LOGMSG(WARNING) << "component-factory: Creating component failed";
+                                    }
+                                }
+                                else {
+                                    LOGMSG(WARNING) << "component-factory: Unknown component type: " << component->component_name;
+                                }
+                                entity->components.push_back(std::move(component));
+                            }
+                        }
+                    }
+                    else if (entity_property_itr->value.IsString()) {
+                        std::string property_value = MakeString(entity_property_itr->value);
+                        if (entity_property_name == "name") {
+                            entity_name = property_value;
+                        }
+                        auto p = std::make_shared<Property>(entity_property_name, property_value);
+                        entity->meta_properties[entity_property_name] = p;
+                    }
+                    else if (entity_property_itr->value.IsBool()) {
+                        bool property_value = entity_property_itr->value.GetBool();
+                        auto p = std::make_shared<Property>(entity_property_name, property_value);
+                        entity->meta_properties[entity_property_name] = p;
+                    }
+                    else if (entity_property_itr->value.IsDouble()) {
+                        double property_value = entity_property_itr->value.GetDouble();
+                        auto p = std::make_shared<Property>(entity_property_name, property_value);
+                        entity->meta_properties[entity_property_name] = p;
+                    }
+                    else if (entity_property_itr->value.IsInt()) {
+                        int property_value = entity_property_itr->value.GetInt();
+                        if (entity_property_name == "id") {
+                            entity_id = property_value;
+                        }
+                        auto p = std::make_shared<Property>(entity_property_name, property_value);
+                        entity->meta_properties[entity_property_name] = p;
+                    }
+                    else if (entity_property_itr->value.IsUint()) {
+                        unsigned int property_value = entity_property_itr->value.GetUint();
+                        if (entity_property_name == "id") {
+                            entity_id = property_value;
+                        }
+                        auto p = std::make_shared<Property>(entity_property_name, property_value);
+                        entity->meta_properties[entity_property_name] = p;
+                    }
+                    else { }
+                }
+
+                this->entities.push_back(std::move(entity));
+            }
+        }
+    }
+}
+
+bool JSONParser::Parse(const std::string& fname) {
     std::vector<Property> props;
     Property p("filename", fname);
     props.push_back(p);
@@ -72,6 +185,9 @@ bool JSONPasrser::Parse(const std::string& fname) {
                 }
             }
             else if (itr->value.IsObject() || itr->value.IsArray()) {
+                if (name == "entities") {
+                    ParseJSONEntity(itr->value);
+                }
                 if (this->parsers.find(name) != this->parsers.end()) {
                     this->parsers[name]->Parse(itr->value);
                 }
@@ -82,7 +198,7 @@ bool JSONPasrser::Parse(const std::string& fname) {
     return true;
 }
 
-void JSONPasrser::Serialize(const std::string& out_directory, const std::string& fname, std::shared_ptr<Parser> parser) {
+void JSONParser::Serialize(const std::string& out_directory, const std::string& fname, std::shared_ptr<Parser> parser) {
     if (fname.length() > 0) {
         rapidjson::Document document;
         document.SetObject();
@@ -131,13 +247,13 @@ void JSONPasrser::Serialize(const std::string& out_directory, const std::string&
     }
 }
 
-std::map<std::string, Parser*> JSONPasrser::parsers;
+std::map<std::string, Parser*> JSONParser::parsers;
 
-void JSONPasrser::RegisterParser(std::shared_ptr<Parser> parser) {
+void JSONParser::RegisterParser(std::shared_ptr<Parser> parser) {
     parsers[parser->GetNodeTypeName()] = parser.get();
 }
 
-void JSONPasrser::RegisterParser(Parser* parser) {
+void JSONParser::RegisterParser(Parser* parser) {
     parsers[parser->GetNodeTypeName()] = parser;
 }
 

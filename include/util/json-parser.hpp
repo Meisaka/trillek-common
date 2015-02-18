@@ -3,9 +3,15 @@
 
 #include <memory>
 #include <map>
+#include <vector>
 #include <list>
 #include <rapidjson/document.h>
 #include <string>
+#include <functional>
+
+#include "property.hpp"
+#include "logging.hpp"
+#include "components/component-factory.hpp"
 
 namespace trillek {
 namespace resource {
@@ -56,9 +62,25 @@ struct JSONDocument {
     rapidjson::Document document; // Currently parsed document.
 };
 
-class JSONPasrser final {
+// Stores a parsed json entity's component object.
+struct JSONComponent {
+    std::vector<Property> properties;
+    std::string component_name;
+};
+
+// Stores a parsed json entity object.
+struct JSONEntity {
+    std::map<std::string, std::shared_ptr<Property>> meta_properties; // ID, name, etc
+    std::vector<std::shared_ptr<JSONComponent>> components;
+    rapidjson::Document* document; // The document this entity was parsed from.
+};
+
+class JSONParser final {
 public:
-    JSONPasrser();
+    JSONParser();
+
+    void ParseJSONEntity(rapidjson::Value& node);
+    std::shared_ptr<JSONComponent> ParseJSONComponent(rapidjson::Value& node);
 
     /**
      * \brief Parses a JSON file with the given filename.
@@ -106,7 +128,43 @@ public:
      * \return void
      */
     static void RegisterTypes();
+    void RegisterComponentTypes();
+
+    /**
+    * \brief Register a type to be available for factory calls.
+    *
+    * \return void
+    */
+    template<ComponentType cptype, Component C, class T>
+    void RegisterComponentType(ComponentFactory<cptype, C, T>&& adder) {
+        // Store the type ID associated with the type name.
+        LOGMSGC(DEBUG) << "adding factory of " << reflection::GetTypeName<std::integral_constant<Component, C>>();
+        component_type_id[reflection::GetTypeName<std::integral_constant<Component, C>>()] = static_cast<uint32_t>(C);
+
+        this->factories[static_cast<uint32_t>(C)] =
+            std::bind(&ComponentFactory<cptype, C, T>::Create, adder, std::placeholders::_1, std::placeholders::_2);
+    }
+
+    /**
+    * \brief Returns a type ID associated with the given name.
+    *
+    * \param[in] const std::string & type_Name The name to look for a type ID.
+    * \return unsigned int Returns 0 if the name doesn't exist.
+    */
+    unsigned int GetTypeIDFromName(const std::string& type_Name) {
+        if (!component_type_id.count(type_Name)) {
+            LOGMSGC(ERROR) << "Could not find id type of " << type_Name;
+            return 0;
+        }
+        return component_type_id.find(type_Name)->second;
+    }
 private:
+    // Component creation
+    std::map<std::string, unsigned int> component_type_id; // Stores a mapping of TypeName to TypeID
+    std::map<unsigned int, std::function<bool(const unsigned int, const std::vector<Property> &properties)>> factories; // Mapping of type ID to factory function.
+
+    std::vector<std::shared_ptr<JSONEntity>> entities;
+
     std::list<std::shared_ptr<JSONDocument>> documents;
     static std::map<std::string, Parser*> parsers; // Mapping of node_type_name to parser
 };

@@ -2,6 +2,7 @@
 #include "property.hpp"
 #include "components/component-container.hpp"
 #include "physics/collidable.hpp"
+#include "systems/physics.hpp"
 #include "interaction.hpp"
 #include "trillek-game.hpp"
 #include "components/system-component-value.hpp"
