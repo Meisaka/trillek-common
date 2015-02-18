@@ -21,7 +21,7 @@ public:
      * \param[in] const std::vector<Property> &properties The creation properties for the component.
      * \return bool True if initialization finished with no errors.
      */
-    virtual bool Initialize(const std::vector<Property> &properties) { return false; };
+    virtual bool Initialize(const id_t entity_id, const std::vector<Property> &properties) { return false; };
 
     unsigned int component_type_id;
 };
@@ -44,7 +44,7 @@ struct ContainerRef {
  *
  */
 template<Component C>
-std::shared_ptr<Container> Initialize(const std::vector<Property> &properties) {
+std::shared_ptr<Container> Initialize(const id_t entity_id, const std::vector<Property> &properties) {
     return component::Create<C>(typename type_trait<C>::value_type());
 }
 
@@ -60,7 +60,7 @@ std::shared_ptr<Container> Initialize(const std::vector<Property> &properties) {
  *
  */
 template<Component C>
-typename type_trait<C>::value_type Initialize(bool& result, const std::vector<Property> &properties) {
+typename type_trait<C>::value_type Initialize(bool& result, const id_t entity_id, const std::vector<Property> &properties) {
     result = true;
     return typename type_trait<C>::value_type();
 }

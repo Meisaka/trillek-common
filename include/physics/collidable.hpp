@@ -34,7 +34,7 @@ public:
      * \param[in] const std::vector<Property>& properties The creation properties for the component.
      * \return bool true if initialization finished with no errors.
      */
-    bool Initialize(const std::vector<Property> &properties);
+    bool Initialize(const id_t entity_id, const std::vector<Property> &properties);
 
     /**
      * \brief Sets the shapes transform using the provided entity ID

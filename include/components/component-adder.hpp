@@ -13,7 +13,7 @@ template<Component type, typename std::enable_if<!std::is_base_of<ComponentBase,
 static std::shared_ptr<component::Container> CreateComponent(
         id_t entity_id, const std::vector<Property> &properties) {
     auto type_id = static_cast<uint32_t>(type);
-    auto sharedcomp = component::Initialize<type>(properties);
+    auto sharedcomp = component::Initialize<type>(entity_id, properties);
     if (!sharedcomp) {
         LOGMSG(ERROR) << "Error while initializing component "
                         << reflection::GetTypeName<std::integral_constant<Component,type>>() << " for entity id #" << entity_id;
@@ -27,7 +27,7 @@ static std::shared_ptr<component::Container> CreateComponent(
         id_t entity_id, const std::vector<Property> &properties) {
     auto type_id = static_cast<uint32_t>(type);
     auto ret = component::Create<type>(T());
-    if (component::Get<type>(ret)->Initialize(properties)) {
+    if (component::Get<type>(ret)->Initialize(entity_id, properties)) {
         return std::move(ret);
     }
     LOGMSG(ERROR) << "Error while initializing class component "
@@ -87,7 +87,7 @@ public:
 
     bool Create(id_t entity_id, const std::vector<Property> &properties) {
         bool result = false;
-        auto comp = component::Initialize<type>(result, properties);
+        auto comp = component::Initialize<type>(result, entity_id, properties);
         if (!result) {
             LOGMSGC(ERROR) << "Error while initializing component "
                 << reflection::GetTypeName<std::integral_constant<Component,type>>() << " for entity id #" << entity_id;
@@ -110,7 +110,7 @@ public:
 
     bool Create(id_t entity_id, const std::vector<Property> &properties) {
         bool result = false;
-        auto comp = component::Initialize<type>(result, properties);
+        auto comp = component::Initialize<type>(result, entity_id, properties);
         if (!result) {
             LOGMSGC(ERROR) << "Error while initializing component "
                 << reflection::GetTypeName<std::integral_constant<Component,type>>()
@@ -136,7 +136,7 @@ public:
 
     bool Create(id_t entity_id, const std::vector<Property> &properties) {
         bool result = false;
-        auto comp = component::Initialize<type>(result, properties);
+        auto comp = component::Initialize<type>(result, entity_id, properties);
         if (!result) {
             LOGMSGC(ERROR) << "Error while initializing component "
                 << reflection::GetTypeName<std::integral_constant<Component,type>>()
@@ -162,7 +162,7 @@ public:
 
     bool Create(id_t entity_id, const std::vector<Property> &properties) {
         bool result = false;
-        auto comp = component::Initialize<type>(result, properties);
+        auto comp = component::Initialize<type>(result, entity_id, properties);
         if (!result) {
             LOGMSGC(ERROR) << "Error while initializing component "
                 << reflection::GetTypeName<std::integral_constant<Component,type>>()

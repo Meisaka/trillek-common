@@ -18,19 +18,15 @@
 namespace trillek {
 namespace hw {
 
-bool Computer::Initialize(const std::vector<Property> &properties) {
+bool Computer::Initialize(const id_t entity_id, const std::vector<Property> &properties) {
     using namespace component;
-    id_t entity_id = 0;
     std::string cputype;
     std::string romfile;
     uint32_t cpuclock = 100000;
     std::size_t memory = 128*1024;
     for (const Property& p : properties) {
         std::string name = p.GetName();
-        if(name == "entity_id") {
-            entity_id = p.Get<uint32_t>();
-        }
-        else if(name == "cpu") {
+        if(name == "cpu") {
             cputype = p.Get<std::string>();
         }
         else if(name == "rate") {
@@ -151,20 +147,18 @@ public:
     computer::tda::TDAScreen screen;
 };
 
-bool VDisplay::Initialize(const std::vector<Property> &properties) {
+bool VDisplay::Initialize(const id_t entity_id, const std::vector<Property> &properties) {
     using namespace component;
     uint32_t instid = 0;
     entity_link = 0;
     slot = 2;
+    this->entity_id = entity_id;
 
     std::string modelname("TDA");
     std::string mfgname;
     for (const Property& p : properties) {
         std::string name = p.GetName();
-        if(name == "entity_id") {
-            entity_id = p.Get<uint32_t>();
-        }
-        else if(name == "instance_id") {
+        if(name == "instance_id") {
             instid = p.Get<uint32_t>();
         }
         else if(name == "link_id") {
@@ -310,18 +304,16 @@ void VKeyboard::Notify(const KeyboardEvent* data) {
     }
 }
 
-bool VKeyboard::Initialize(const std::vector<Property> &properties) {
+bool VKeyboard::Initialize(const id_t entity_id, const std::vector<Property> &properties) {
     using namespace component;
     slot = 1;
+    this->entity_id = entity_id;
 
     std::string modelname("generic");
     std::string mfgname;
     for (const Property& p : properties) {
         std::string name = p.GetName();
-        if(name == "entity_id") {
-            entity_id = p.Get<uint32_t>();
-        }
-        else if(name == "link_id") {
+        if(name == "link_id") {
             entity_link = p.Get<uint32_t>();
         }
         else if(name == "slot") {

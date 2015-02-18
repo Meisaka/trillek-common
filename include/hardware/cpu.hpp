@@ -29,7 +29,7 @@ public:
         }
     }
 
-    bool Initialize(const std::vector<Property> &properties) override;
+    bool Initialize(const id_t entity_id, const std::vector<Property> &properties) override;
 
     bool LoadROMFile(const std::string& fname);
     void SetDevice(uint32_t slot, std::shared_ptr<computer::Device> device);
@@ -100,7 +100,7 @@ public:
     ~VDisplay() {
     }
 
-    bool Initialize(const std::vector<Property> &properties) override;
+    bool Initialize(const id_t entity_id, const std::vector<Property> &properties) override;
 
     void ScreenUpdate();
 
@@ -160,7 +160,7 @@ public:
     ~VKeyboard() {
     }
 
-    bool Initialize(const std::vector<Property> &properties) override;
+    bool Initialize(const id_t entity_id, const std::vector<Property> &properties) override;
     void SetActive(bool active);
     bool IsActive() const { return active; }
 
