@@ -53,6 +53,52 @@ std::shared_ptr<JSONComponent> JSONParser::ParseJSONComponent(rapidjson::Value& 
                 Property p(component_property_name, property_value);
                 component->properties.push_back(p);
             }
+            else if (component_property_itr->value.IsArray()) {
+                auto array_itr = component_property_itr->value.Begin();
+                if (array_itr != component_property_itr->value.End()) {
+                    if (array_itr->IsNumber()) {
+                        std::vector<double> values;
+                        for (; array_itr != component_property_itr->value.End(); array_itr++) {
+                            if (array_itr->IsNumber()) {
+                                values.push_back(array_itr->GetDouble());
+                            }
+                        }
+                        if (values.size() == 2) {
+                            Property p(component_property_name,
+                                glm::vec2(values[0], values[1]));
+                            component->properties.push_back(p);
+                        }
+                        else if (values.size() == 3) {
+                            Property p(component_property_name,
+                                glm::vec3(values[0], values[1], values[2]));
+                            component->properties.push_back(p);
+                        }
+                        else if (values.size() == 4) {
+                            Property p(component_property_name,
+                                glm::vec4(values[0], values[1], values[2], values[3]));
+                            component->properties.push_back(p);
+                        }
+                    }
+                    else if (array_itr->IsBool()) {
+                        std::vector<bool> values;
+                        for (; array_itr != component_property_itr->value.End(); array_itr++) {
+                            if (array_itr->IsBool()) {
+                                values.push_back(array_itr->GetBool());
+                            }
+                        }
+                        component->properties.push_back(Property(component_property_name, std::move(values)));
+                    }
+                    else if (array_itr->IsString()) {
+                        std::vector<std::string> values;
+                        for (; array_itr != component_property_itr->value.End(); array_itr++) {
+                            if (array_itr->IsString()) {
+                                values.push_back(std::string(array_itr->GetString(), array_itr->GetStringLength()));
+                            }
+                        }
+                        component->properties.push_back(Property(component_property_name, std::move(values)));
+                    }
+                }
+            }
             // TODO ele if (component_property_itr->value.IsObject()) {} to handle inline resource initialization, etc.
         }
         return component;
