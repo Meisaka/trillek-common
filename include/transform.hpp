@@ -13,7 +13,8 @@ static glm::vec3 RIGHT_VECTOR(1.0f, 0.0f, 0.0f);
 
 class Transform final {
 public:
-    Transform() : Transform(0) {};
+    Transform();
+    Transform(glm::vec3 translation, glm::vec3 rotation, glm::vec3 scale);
 
     Transform(unsigned int entity_id);
     /**
@@ -113,16 +114,11 @@ public:
      * \return glm::vec3 The current scale.
      */
     glm::vec3 GetScale() const;
-
-    unsigned int GetEntityID() const {
-        return this->entity_id;
-    }
 private:
     glm::vec3 translation;
     glm::vec3 rotation;
     glm::vec3 scale;
     glm::quat orientation;
-    unsigned int entity_id;
 };
 
 } // End of trillek

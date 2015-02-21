@@ -40,14 +40,13 @@ Collidable::~Collidable() {
     }
 }
 
-bool Collidable::Initialize(const std::vector<Property> &properties) {
+bool Collidable::Initialize(const id_t entity_id, const std::vector<Property> &properties) {
     std::string shape = "sphere";
     std::string mesh_name;
     this->radius = 1.0;
     this->height = 1.0;
     this->mass = 1.0;
     this->disable_rotation = false;
-    id_t entity_id;
     for (const Property& p : properties) {
         std::string name = p.GetName();
         if (name == "radius") {
@@ -70,9 +69,6 @@ bool Collidable::Initialize(const std::vector<Property> &properties) {
         }
         else if(name == "rotation") {
             disable_rotation = !p.Get<bool>();
-        }
-        else if (name == "entity_id") {
-            entity_id = p.Get<unsigned int>();
         }
     }
 

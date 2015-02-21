@@ -33,6 +33,8 @@ class SixDOFCamera;
 
 namespace physics {
 class Collidable;
+struct VelocityStruct;
+struct VelocityMaxStruct;
 }
 
 namespace hw {

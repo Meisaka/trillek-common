@@ -2,6 +2,7 @@
 #include "property.hpp"
 #include "components/component-container.hpp"
 #include "physics/collidable.hpp"
+#include "systems/physics.hpp"
 #include "interaction.hpp"
 #include "trillek-game.hpp"
 #include "components/system-component-value.hpp"
@@ -32,9 +33,8 @@ struct ContainerRef<Shared> {
 Shared& ContainerRef<Shared>::container = game.GetSharedComponent();
 
 template<>
-std::shared_ptr<Container> Initialize<Component::VelocityMax>(const std::vector<Property> &properties) {
+std::shared_ptr<Container> Initialize<Component::VelocityMax>(const id_t entity_id, const std::vector<Property> &properties) {
     glm::vec3 lmax(0.0f,0.0f,0.0f), amax(0.0f,0.0f,0.0f);
-    id_t entity_id;
     for (const Property& p : properties) {
         std::string name = p.GetName();
         if (name == "max_horizontal") {
@@ -51,9 +51,6 @@ std::shared_ptr<Container> Initialize<Component::VelocityMax>(const std::vector<
             amax.y = tamax;
             amax.z = tamax;
         }
-        else if (name == "entity_id") {
-            entity_id = p.Get<id_t>();
-        }
         else {
             LOGMSG(ERROR) << "VelocityMax: Unknown property: " << name;
             return nullptr;
@@ -63,8 +60,8 @@ std::shared_ptr<Container> Initialize<Component::VelocityMax>(const std::vector<
 }
 
 template<>
-id_t Initialize<Component::ReferenceFrame>(bool& result, const std::vector<Property> &properties) {
-    id_t entity_id, reference_id;
+id_t Initialize<Component::ReferenceFrame>(bool& result, const id_t entity_id, const std::vector<Property> &properties) {
+    id_t reference_id;
     Velocity_type ref_velocity;
     result = false;
     for (const Property& p : properties) {
@@ -77,9 +74,6 @@ id_t Initialize<Component::ReferenceFrame>(bool& result, const std::vector<Prope
             }
             ref_velocity = game.GetSharedComponent().Get<Component::Velocity>(reference_id);
             result = true;
-        }
-        else if (name == "entity_id") {
-            entity_id = p.Get<id_t>();
         }
         else {
             LOGMSG(ERROR) << "ReferenceFrame: Unknown property: " << name;
@@ -95,8 +89,7 @@ id_t Initialize<Component::ReferenceFrame>(bool& result, const std::vector<Prope
 }
 
 template<>
-float_t Initialize<Component::OxygenRate>(bool& result, const std::vector<Property> &properties) {
-    id_t entity_id;
+float_t Initialize<Component::OxygenRate>(bool& result, const id_t entity_id, const std::vector<Property> &properties) {
     auto oxygen_rate = 20.0f;       // default value;
     result = false;
     for (const Property& p : properties) {
@@ -104,21 +97,18 @@ float_t Initialize<Component::OxygenRate>(bool& result, const std::vector<Proper
         if (name == "rate") {
             oxygen_rate = p.Get<float>();
         }
-        else if (name == "entity_id") {
-            entity_id = p.Get<id_t>();
-            // tell to the caller that we must add the component
-            result = true;
-        }
         else {
             LOGMSG(ERROR) << "OxygenRate: Unknown property: " << name;
         }
+    }
+    if (entity_id > 0) {
+        result = true;
     }
     return oxygen_rate;
 }
 
 template<>
-uint32_t Initialize<Component::Health>(bool& result, const std::vector<Property> &properties) {
-    id_t entity_id;
+uint32_t Initialize<Component::Health>(bool& result, const id_t entity_id, const std::vector<Property> &properties) {
     uint32_t health = 100;       // default value;
     result = false;
     for (const Property& p : properties) {
@@ -126,21 +116,18 @@ uint32_t Initialize<Component::Health>(bool& result, const std::vector<Property>
         if (name == "health") {
             health = p.Get<uint32_t>();
         }
-        else if (name == "entity_id") {
-            entity_id = p.Get<id_t>();
-            // tell to the caller that we must add the component
-            result = true;
-        }
         else {
             LOGMSG(ERROR) << "Health: Unknown property: " << name;
         }
+    }
+    if (entity_id > 0) {
+        result = true;
     }
     return health;
 }
 
 template<>
-bool Initialize<Component::Movable>(bool& result, const std::vector<Property> &properties) {
-    id_t entity_id;
+bool Initialize<Component::Movable>(bool& result, const id_t entity_id, const std::vector<Property> &properties) {
     result = false;
     bool movable = false;
     for (const Property& p : properties) {
@@ -148,13 +135,12 @@ bool Initialize<Component::Movable>(bool& result, const std::vector<Property> &p
         if (name == "movable") {
             movable = p.Get<bool>();
         }
-        else if (name == "entity_id") {
-            entity_id = p.Get<id_t>();
-            result = true;
-        }
         else {
             LOGMSG(ERROR) << "Movable: Unknown property: " << name;
         }
+    }
+    if (entity_id > 0) {
+        result = true;
     }
     if(movable) {
         if(!Has<Component::Interactable>(entity_id)) {
