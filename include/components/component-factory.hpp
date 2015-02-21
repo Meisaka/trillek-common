@@ -4,6 +4,7 @@
 #include "shared-component.hpp"
 #include "system-component.hpp"
 #include "system-component-value.hpp"
+#include "systems/system-base.hpp"
 
 namespace trillek {
 

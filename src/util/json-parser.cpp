@@ -120,7 +120,7 @@ void JSONParser::ParseJSONEntity(rapidjson::Value& node) {
                     if (entity_property_itr->value.IsObject()) {
                         if (entity_property_itr->value.IsObject()) {
                             unsigned int component_type_id = GetTypeIDFromName(entity_property_name);
-                            
+
                             auto component = ParseJSONComponent(entity_property_itr->value);
                             if (component) {
                                 component->component_name = entity_property_name;
