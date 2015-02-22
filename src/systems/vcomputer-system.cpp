@@ -90,20 +90,7 @@ void VComputerSystem::OnEvent(const InteractEvent& event) {
 }
 
 void VComputerSystem::Notify(const KeyboardEvent* key_event) {
-    switch (key_event->action) {
-    case KeyboardEvent::KEY_DOWN:
-        //this->gkeyb->SendKeyEvent(key_event->scancode, key_event->key, computer::gkeyboard::KEY_MODS::KEY_MOD_NONE);
-        LOGMSGC(INFO) << "KEY_DOWN " << key_event->scancode << ", " << key_event->key;
-        break;
-    case KeyboardEvent::KEY_CHAR:
-        LOGMSGC(INFO) << "KEY_CHAR " << key_event->scancode << ", " << key_event->key;
-        break;
-    case KeyboardEvent::KEY_UP:
-        LOGMSGC(INFO) << "KEY_UP " << key_event->scancode << ", " << key_event->key;
-        break;
-    default:
-        break;
-    }
+
 }
 
 } // namespace trillek

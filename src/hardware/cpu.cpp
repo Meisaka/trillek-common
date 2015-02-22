@@ -3,6 +3,7 @@
 #include "trillek-game.hpp"
 #include "components/component.hpp"
 #include "components/system-component.hpp"
+#include "graphics/renderable.hpp"
 #include "systems/resource-system.hpp"
 #include "systems/vcomputer-system.hpp"
 #include "event-queue.hpp"
@@ -182,9 +183,8 @@ bool VDisplay::Initialize(const id_t entity_id, const std::vector<Property> &pro
         LOGMSG(ERROR) << "VDisplay: Invalid model name";
         return false;
     }
-    std::stringstream resname;
-    resname << entity_id << "%" << instid;
-    auto pixa = resource::ResourceMap::Get<resource::PixelBuffer>(resname.str());
+    auto& render = game.GetSystemComponent().Get<Component::Renderable>(entity_id);
+    auto pixa = render.GetInstanceTexture(instid);
     if(!pixa) {
         return false;
     }
